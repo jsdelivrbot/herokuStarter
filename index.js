@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var cool = require('cool-ascii-faces');
+var pg = require('pg');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -25,6 +26,20 @@ app.get('/times', function(request, response){
     result += i + ' ';
   }
   response.send(result);
+})
+
+app.get('/db', function(request, response){
+  pg.connect(process.env.DATABASE_URL, function(err, client, done){
+    client.query('SELECT * from test_table', function(err, result){
+      done();
+      if(err){
+        console.error(err);
+        response.send("error: " + err);
+      } else {
+        response.render('pages/db', {results: result.rows});
+      }
+    });
+  });
 })
 
 app.listen(app.get('port'), function() {
